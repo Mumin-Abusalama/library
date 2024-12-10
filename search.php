@@ -8,6 +8,31 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <?php
+    session_start();
+
+    $servername = "localhost";
+    $username = "username";
+    $password = "your_password";
+    $dbname = "librarydb";
+    // Create connection
+    $conn = new mysqli($servername, $username, $password,$dbname);
+    // Check connection
+    if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+    }
+    
+    //categories fetched from database to avoid being hard coded
+    $categories = [];
+    $sql = "SELECT categoryDescr FROM category"; 
+    $result = $conn->query($sql);
+    
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $categories[] = $row['categoryDescr'];
+        }
+    }
+    ?>
 <div class="wrapper">
     <h2>Search by Title</h2>
     <form method="POST" class="form">
@@ -26,18 +51,24 @@
     
     <form method="POST" class="form">
         <label for="categoryDescr">Category:</label>
-        <input type="text" id="categoryDescr" name="categoryDescr" required>
+        <input list="categoryDescr" name ="categoryDescr" required>
+        <datalist id="categoryDescr">
+            <?php
+            foreach ($categories as $category) {
+                echo "<option value=\"$category\">";
+            }
+            ?>
+        </datalist>
         <button type="submit"class="button">Search</button>
     </form>
-    <form action="books.php">
+    <br>
+    <form action="menu.php">
         <button type="submit"class="button">Back</button>
       </form>
     </div>
       
 </div>
 <?php
-session_start();
-
 $servername = "localhost";
 $username = "username";
 $password = "your_password";
@@ -48,6 +79,7 @@ $conn = new mysqli($servername, $username, $password,$dbname);
 if ($conn->connect_error) {
 die("Connection failed: " . $conn->connect_error);
 }
+
 //Search by Book Title
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $title = $Author = "";
@@ -67,8 +99,10 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
+    echo " <div class='book-list'>";
     while ($row = $result->fetch_assoc()) {
-    echo "<form method='POST' action=''>
+    echo "<div class='book-item'>
+    <form method='POST'class='form1' action=''>
     <p>
         ISBN: " . $row["ISBN"] . "<br>
         Book Title: " . $row["BookTitle"] . "<br>
@@ -79,11 +113,14 @@ if ($result->num_rows > 0) {
         <input type='hidden' name='book_title' value='" . $row["BookTitle"] . "'>
         <button type='submit' name='reserve_button' class='button'" . $row["reserved"] . ">Reserve</button>
     </p>
-    </form>";
+    </form>
+    </div>";
+
         } 
+        echo"</div>";
     }
 else {
-    echo "0 results";
+    echo "<h3>0 results</h3>";
     }
     }
     //Search by Author
@@ -102,8 +139,10 @@ if(isset($_POST["Author"])){
     $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
+    echo " <div class='book-list'>";
     while ($row = $result->fetch_assoc()) {
-        echo "<form method='POST'action=''>
+        echo "<div class='book-item'>
+        <form method='POST' class ='form1'action=''>
         <p>
             ISBN: " . $row["ISBN"] . "<br>
             Book Title: " . $row["BookTitle"] . "<br>
@@ -113,17 +152,18 @@ if ($result->num_rows > 0) {
             <input type='hidden' name='ISBN' value='" . $row["ISBN"] . "'>
             <input type='hidden' name='book_title' value='" . $row["BookTitle"] . "'>
             <button type='submit' name='reserve_button' class='button'" . $row["reserved"] . ">Reserve</button>
-
-    </p>
-        </form>";
+        </form>
+        </div>";
 
         } 
+        echo"</div>";
     }
     else {
-    echo "<p>0 results</p>";
+    echo "<h3>0 results</h3>";
     }
-}       
 }
+}       
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $category = "";
     //Check if it is empty and declared
@@ -140,10 +180,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->execute();
     //The result of the statement
     $result = $stmt->get_result();
-    
+    echo " <div class='book-list'>";
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            echo "<form method='POST' class='form1' action=''>
+            //outputs the available books 
+            echo
+            "<div class='book-item'>
+            <form method='POST' class='form1' action=''>
             <p>
                  ISBN: " . $row["ISBN"] . "<br>
                     Book Title: " . $row["BookTitle"] . "<br>
@@ -155,12 +198,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <button type='submit' name='reserve_button' class='button'" . $row["reserved"]   . ">Reserve</button><br>
             <br>
             </p>
-            </form>";
+            </form>
+            </div>";
         }
+        echo"</div>";
     }
         
     else {
-            echo "0 results";
+            echo "<h3>0 results<h3>";
         }
     }
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -179,14 +224,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($result->num_rows == 0) {
             // Book not found
-            echo "<p>Sorry, no book found with ISBN: $ISBN.</p>";
+            echo "<h3>Sorry, no book found with ISBN: $ISBN.<h3>";
         }
          else {
             $row = $result->fetch_assoc();
 
             if ($row['reserved'] == 'Y') {
                 // The book is already reserved
-                echo "<center>Sorry, this book is already reserved.</center>";
+                echo "<h3>Sorry, this book is already reserved.</h3>";
             } 
             else {
                 // If the book is available
@@ -204,7 +249,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Check if the reservation was successful
     if ($reserve_stmt->affected_rows > 0) {
-        echo "<center>Book successfully reserved!</center>";
+        echo "<h3>Book successfully reserved!</h3>";
     } 
     else {
         echo "<p>There was an issue reserving the book. Please try again.</p>";
@@ -216,6 +261,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 $conn->close();
 ?>
+<footer>
+<div class="footer-bottom">
+        <p>&copy; 2024 Library</p>
+      </div>
+    </footer>
 </body>
 </html>
 

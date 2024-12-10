@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login</title>
     <link rel="stylesheet" href="styles.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
@@ -13,6 +13,7 @@
 <body>
     <?php
     session_start();
+    //connecting the database
     $servername = "localhost";
     $username = "username";
     $password = "your_password";
@@ -28,7 +29,6 @@
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $username = $_POST['username'];
         $password = $_POST['password'];
-
         // Query to check if the user exists in the database
         $sql = "SELECT * FROM userregisteration WHERE username = ?";
         //prepares the sql statement
@@ -48,7 +48,7 @@
             if ($password == $user['Password']) {
                 // Set session variables if login is successful
                 $_SESSION['username'] = $user['username'];
-                header('Location: books.php');//redirects the user to the library page after logging in successfully
+                header('Location: menu.php');//redirects the user to the library page after logging in successfully
                 //displays a message along with the username of the user
                 echo "Login successful! Welcome, " . htmlspecialchars($user['username']);
             } else {
@@ -82,6 +82,10 @@
     <p>Don't have an account?<a href ="register.php">Register</a></p>
 </form>
 </div>
-
+<footer>
+<div class="footer-bottom">
+        <p>&copy; 2024 Library</p>
+      </div>
+    </footer>
 </body>
 </html>

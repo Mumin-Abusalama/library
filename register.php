@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Register</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -19,14 +19,14 @@ $conn = new mysqli($servername,$username, $password, $dbname);
 if ($conn->connect_error) {
 die("Connection failed: " . $conn->connect_error);
 }
-
+//Retrieves information from the form
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $username = $_POST['username'];
         $first_name = $_POST['Fname'];
         $last_name = $_POST['Lname'];
         $mobile = $_POST['Number'];
         $password = $_POST['password'];
-
+        //inserts the information into the database
         $stmt = $conn->prepare("INSERT INTO UserRegisteration (Username, FirstName, LastName, MobileNumber, password) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $username,$first_name, $last_name, $mobile, $password);
 
@@ -68,7 +68,11 @@ die("Connection failed: " . $conn->connect_error);
         <p>Already have an account?<a href ="login.php">Login</a></p>
     </form>
     </div>
-
+    <footer>
+<div class="footer-bottom">
+        <p>&copy; 2024 Library</p>
+      </div>
+    </footer>
 
 </body>
 </html>
